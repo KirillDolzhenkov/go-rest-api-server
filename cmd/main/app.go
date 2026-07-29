@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"go-rest-api-server/internal/user"
 	"log"
 	"net"
 	"net/http"
@@ -10,16 +10,21 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	name := params.ByName("name")
-	w.Write([]byte(fmt.Sprintf("Test %s", name)))
+func main() {
+	log.Println("create router")
+	router := httprouter.New()
+
+	log.Println("register user handler")
+	handler := user.NewHandler()
+	handler.Register(router)
+
+	start(router)
 }
 
-func main() {
-	router := httprouter.New()
-	router.GET("/:name", IndexHandler)
+func start(router *httprouter.Router) {
+	log.Println("start server")
 
-	listener, err := net.Listen("tcp", "127.0.0.1:1234")
+	listener, err := net.Listen("tcp", ":1234")
 	if err != nil {
 		panic(err)
 	}
@@ -30,5 +35,6 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
+	log.Println("server is listening port 0.0.0.0:1234")
 	log.Fatal(server.Serve(listener))
 }
