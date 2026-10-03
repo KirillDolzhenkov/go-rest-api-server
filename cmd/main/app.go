@@ -1,30 +1,41 @@
 package main
 
 import (
+	"go-rest-api-server/internal/config"
 	"go-rest-api-server/internal/user"
-	"log"
+	"go-rest-api-server/pkg/logging"
+	"log/slog"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
-	log.Println("create router")
+	cfg := config.MustLoad()
+
+	log := logging.SetupLogger(cfg.Env)
+
+	log.Info("starting app", slog.String("env", cfg.Env))
+	log.Debug("debug messages are enabled")
+
+	log.Info("create router")
 	router := httprouter.New()
 
-	log.Println("register user handler")
+	log.Info("register user handler")
 	handler := user.NewHandler()
 	handler.Register(router)
 
-	start(router)
+	log.Info("start http server")
+	start(router, log, cfg)
 }
 
-func start(router *httprouter.Router) {
-	log.Println("start server")
+func start(router *httprouter.Router, log *slog.Logger, cfg *config.Config) {
+	log.Info("start server")
 
-	listener, err := net.Listen("tcp", ":1234")
+	listener, err := net.Listen("tcp", cfg.Address)
 	if err != nil {
 		panic(err)
 	}
@@ -35,6 +46,10 @@ func start(router *httprouter.Router) {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Println("server is listening port 0.0.0.0:1234")
-	log.Fatal(server.Serve(listener))
+	log.Info("server is listening", slog.String("address", cfg.Address))
+
+	if err := server.Serve(listener); err != nil {
+		log.Error("server failed", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
 }
