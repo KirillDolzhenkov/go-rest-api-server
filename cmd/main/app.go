@@ -28,7 +28,6 @@ func main() {
 	handler := user.NewHandler()
 	handler.Register(router)
 
-	log.Info("start http server")
 	start(router, log, cfg)
 }
 
