@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
@@ -22,7 +20,7 @@ func main() {
 	log.Debug("debug messages are enabled")
 
 	log.Info("create router")
-	router := httprouter.New()
+	router := http.NewServeMux()
 
 	log.Info("register user handler")
 	handler := user.NewHandler()
@@ -31,7 +29,7 @@ func main() {
 	start(router, log, cfg)
 }
 
-func start(router *httprouter.Router, log *slog.Logger, cfg *config.Config) {
+func start(router *http.ServeMux, log *slog.Logger, cfg *config.Config) {
 	log.Info("start server")
 
 	listener, err := net.Listen("tcp", cfg.Address)
