@@ -3,22 +3,26 @@ package logging
 import (
 	"log/slog"
 	"os"
+)
 
-	"go-rest-api-server/internal/config"
+const (
+	EnvLocal = "local"
+	EnvDev   = "dev"
+	EnvProd  = "prod"
 )
 
 func SetupLogger(env string) *slog.Logger {
 	var log *slog.Logger
 	switch env {
-	case config.EnvLocal:
+	case EnvLocal:
 		log = slog.New(
 			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
 		)
-	case config.EnvDev:
+	case EnvDev:
 		log = slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
 		)
-	case config.EnvProd:
+	case EnvProd:
 		log = slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
 		)
